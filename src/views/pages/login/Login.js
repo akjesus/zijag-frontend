@@ -1,5 +1,7 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import.meta.env.VITE_API
+import { Link, useNavigate } from 'react-router-dom'
+import axios from '../../../api/axios'
 import {
   CButton,
   CCard,
@@ -12,18 +14,44 @@ import {
   CInputGroup,
   CInputGroupText,
   CRow,
+  CToaster,
+  CToast,
+  CToastBody,
+  CToastClose,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
 const Login = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [toastVisible, setToastVisible] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+  const [toastColor, setToastColor] = useState('') // Color for success or error
+  const navigate = useNavigate()
+
+  const handleLogin = async (email, password) => {
+    try {
+      const response = await axios.post(`/auth/login`, { email, password })
+      const { token } = response.data // 
+      localStorage.setItem('token', token) 
+  
+      navigate('/dashboard')
+    } catch (error) {
+      console.error('Login failed:', error.response?.data || error.message)
+      setToastMessage('Login failed. Please check your credentials.')
+      setToastColor('danger')
+      setToastVisible(true)
+    }
+  }
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
         <CRow className="justify-content-center">
           <CCol md={8}>
             <CCardGroup>
-              <CCard className="p-4">
+              <CCard className="p-4" style={{ maxWidth: '600px', margin: '0 auto' }}>
                 <CCardBody>
                   <CForm>
                     <h1>Login</h1>
@@ -32,7 +60,12 @@ const Login = () => {
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput
+                        placeholder="Email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -42,11 +75,17 @@ const Login = () => {
                         type="password"
                         placeholder="Password"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton
+                          color="primary"
+                          className="px-4"
+                          onClick={() => handleLogin(email, password)}
+                        >
                           Login
                         </CButton>
                       </CCol>
@@ -59,26 +98,20 @@ const Login = () => {
                   </CForm>
                 </CCardBody>
               </CCard>
-              <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
-                <CCardBody className="text-center">
-                  <div>
-                    <h2>Sign up</h2>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                      tempor incididunt ut labore et dolore magna aliqua.
-                    </p>
-                    <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>
-                        Register Now!
-                      </CButton>
-                    </Link>
-                  </div>
-                </CCardBody>
-              </CCard>
             </CCardGroup>
           </CCol>
         </CRow>
       </CContainer>
+      <CToaster placement="top-end">
+        {toastVisible && (
+          <CToast autohide={true} visible={toastVisible} color={toastColor} onClose={() => setToastVisible(false)}>
+            <CToastBody>
+              {toastMessage}
+              <CToastClose onClick={() => setToastVisible(false)} />
+            </CToastBody>
+          </CToast>
+        )}
+      </CToaster>
     </div>
   )
 }

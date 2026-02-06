@@ -1,6 +1,12 @@
 import React from 'react'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
+const Expenses = React.lazy(() => import('./views/pages/Expenses'))
+const Income = React.lazy(() => import('./views/pages/Income'))
+const Sales = React.lazy(() => import('./views/pages/Sales'))
+const Inventory = React.lazy(() => import('./views/pages/Inventory'))
+const Users = React.lazy(() => import('./views/pages/Users'))
+const Reports = React.lazy(() => import('./views/pages/Reports'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
@@ -54,6 +60,12 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/expenses', name: 'Expenses', element: Expenses },
+  { path: '/sales', name: 'Sales', element: Sales },
+  { path: '/income', name: 'Income', element: Income },
+  { path: '/inventory', name: 'Inventory', element: Inventory },
+  { path: '/users', name: 'Users', element: Users },
+  { path: '/reports', name: 'Reports', element: Reports },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
