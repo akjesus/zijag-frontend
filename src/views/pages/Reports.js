@@ -58,7 +58,7 @@ const Reports = () => {
               </div>
             </CCardHeader>
             <CCardBody>
-              {reports ? (
+              {filters.reportType === 'detailed' && reports && (
                 <>
                   <p><strong>Total Income:</strong> N{reports.totalIncome}</p>
                   <p><strong>Total Expenses:</strong> N{reports.totalExpenses}</p>
@@ -94,8 +94,6 @@ const Reports = () => {
                     <CTableBody>
                       {reports.sales.map((sale) => (
                         <React.Fragment key={sale._id}>
-                          <CTableRow>
-                          </CTableRow>
                           {sale.items.map((item, index) => (
                             <CTableRow key={index}>
                               <CTableDataCell>{item.product}</CTableDataCell>
@@ -111,9 +109,18 @@ const Reports = () => {
                     </CTableBody>
                   </CTable>
                 </>
-              ) : (
-                <p>No reports to display. Please filter reports to view data.</p>
               )}
+              {filters.reportType === 'summary' && reports && (
+                <>
+                  <p><strong> Sales :</strong> N{reports.totalSales}</p>
+                  <p><strong> Income:</strong> N{reports.totalIncome}</p>
+                  <p><strong>Total Income:</strong> N{reports.totalIncome + reports.totalSales}</p>
+                  <p><strong>Total Expenses:</strong> N{reports.totalExpenses}</p>
+                  <p><strong>Net Profit:</strong> N{reports.netProfit}</p>
+                  <p><strong>Date:</strong> from {new Date(reports.startDate).toLocaleDateString()} to {new Date(reports.endDate).toLocaleDateString()}</p>
+                </>
+              )}
+              {!reports && <p>No reports to display. Please filter reports to view data.</p>}
             </CCardBody>
           </CCard>
         </CCol>
