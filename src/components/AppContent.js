@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { CContainer, CSpinner } from '@coreui/react'
+import Login from '../views/pages/login/Login.js'
 
 // routes config
 import routes from '../routes'
@@ -11,6 +12,7 @@ const AppContent = () => {
       <Suspense fallback={<CSpinner color="primary" />}>
         <Routes>
           {routes.map((route, idx) => {
+            if (route.path === '/login') return null // Exclude Login route
             return (
               route.element && (
                 <Route
@@ -23,7 +25,6 @@ const AppContent = () => {
               )
             )
           })}
-          <Route path="/" element={<Navigate to="dashboard" replace />} />
         </Routes>
       </Suspense>
     </CContainer>
