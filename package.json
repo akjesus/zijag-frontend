@@ -13,7 +13,8 @@
     "build": "vite build",
     "lint": "eslint",
     "serve": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "dev": "vite --host"
   },
   "dependencies": {
     "@coreui/chartjs": "^4.1.0",
@@ -28,6 +29,7 @@
     "chart.js": "^4.5.1",
     "classnames": "^2.5.1",
     "core-js": "^3.47.0",
+    "dayjs": "^1.11.19",
     "jspdf": "^4.1.0",
     "prop-types": "^15.8.1",
     "react": "^19.2.3",

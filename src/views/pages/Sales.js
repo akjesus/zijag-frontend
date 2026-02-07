@@ -34,15 +34,15 @@ const Sales = () => {
   const [sales, setSales] = useState([]);
   const [items, setItems] = useState([{ product: '', quantity: '', price: '' }]);
   const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState(''); // Add toast message state
+  const [toastMessage, setToastMessage] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [saleToDelete, setSaleToDelete] = useState(null);
-  const [editModalVisible, setEditModalVisible] = useState(false); // State for edit modal
-  const [saleToEdit, setSaleToEdit] = useState(null); // State for the sale being edited
-  const [addModalVisible, setAddModalVisible] = useState(false); // State for add modal
-  const [inventory, setInventory] = useState([]); // State to store inventory items
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [saleToEdit, setSaleToEdit] = useState(null); 
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [inventory, setInventory] = useState([]); 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Number of sales per page
+  const itemsPerPage = 10; 
 
   const handleItemChange = (index, e) => {
     const { name, value } = e.target;
@@ -83,8 +83,8 @@ const Sales = () => {
       setToastVisible(true);
 
     } catch (error) {
-      console.error('Failed to add sales:', error.response?.data || error.message);
-      setToastMessage('Failed to add sales.');
+      console.error( error.response?.data);
+      setToastMessage(error.response?.data.message);
       setToastVisible(true);
     }
   };
@@ -102,9 +102,11 @@ const Sales = () => {
       setDeleteModalVisible(false);
       setSaleToDelete(null);
       setToastMessage('Sale deleted successfully!');
-      setToastVisible(true); // Show toast notification for deletion
+      setToastVisible(true);
     } catch (error) {
       console.error('Failed to delete sale:', error.response?.data || error.message);
+      setToastMessage(error.response?.data.message || 'Failed to delete sale');
+      setToastVisible(true);
     }
   };
 
@@ -130,6 +132,8 @@ const Sales = () => {
       setToastVisible(true); // Show toast notification for update
     } catch (error) {
       console.error('Failed to update sale:', error.response?.data || error.message);
+      setToastMessage(error.response?.data.message || 'Failed to update sale');
+      setToastVisible(true);
     }
   };
 
@@ -175,6 +179,8 @@ const Sales = () => {
         setSales(response.data);
       } catch (error) {
         console.error('Failed to fetch sales:', error.response?.data || error.message);
+        setToastMessage(error.response?.data.message || 'Failed to fetch sales');
+        setToastVisible(true);
       }
     };
 
@@ -183,7 +189,9 @@ const Sales = () => {
         const response = await api.get('/inventory'); // Fetch inventory from the backend
         setInventory(response.data);
       } catch (error) {
-        console.error('Failed to fetch inventory:', error.response?.data || error.message);
+        console.error('Failed to fetch inventory:', error.response?.data.message);
+        setToastMessage(error.response?.data.message || 'Failed to fetch inventory');
+        setToastVisible(true);
       }
     };
 

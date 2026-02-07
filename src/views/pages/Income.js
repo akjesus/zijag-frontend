@@ -20,6 +20,10 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CToast,
+  CToastBody,
+  CToastClose,
+  CToaster,
 } from '@coreui/react';
 import api from '../../api/axios';
 
@@ -27,7 +31,12 @@ const Income = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [income, setIncome] = useState([]);
   const [newIncome, setNewIncome] = useState({ description: '', amount: '' });
+  const [editingId, setEditingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('')
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [incomeToDelete, setIncomeToDelete] = useState(null);
   const itemsPerPage = 10; // Number of income entries per page
 
   useEffect(() => {
@@ -48,15 +57,65 @@ const Income = () => {
     setNewIncome({ ...newIncome, [name]: value });
   };
 
-  const handleAddIncome = async (e) => {
+  const showToast = (message, color) => {
+    setToast({ visible: true, message, color });
+    setTimeout(() => setToast({ visible: false, message: '', color: '' }), 3000);
+  };
+
+  const handleAddOrUpdateIncome = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('/income', newIncome);
-      setIncome((prevIncome) => [...prevIncome, response.data]);
+      if (editingId) {
+        // Update existing income
+        const response = await api.put(`/income/${editingId}`, newIncome);
+        setIncome((prevIncome) =>
+          prevIncome.map((item) => (item._id === editingId ? response.data.income : item))
+        );
+        setToastMessage('Income updated successfully!');
+      setToastVisible(true);
+      } else {
+        // Add new income
+        const response = await api.post('/income', newIncome);
+        setIncome((prevIncome) => [...prevIncome, response.data.income]);
+        setToastMessage('Income added successfully!');
+        setToastVisible(true);
+      }
       setModalVisible(false);
       setNewIncome({ description: '', amount: '' });
+      setEditingId(null); // Reset editing ID
     } catch (error) {
-      console.error('Failed to add income:', error.response?.data || error.message);
+      console.error('Failed to save income:', error.response?.data || error.message);
+      setToastMessage('Failed to save income');
+      setToastVisible(true);
+    }
+  };
+
+  const handleEditIncome = (id) => {
+    const incomeToEdit = income.find((item) => item._id === id);
+    if (incomeToEdit) {
+      setNewIncome({ description: incomeToEdit.description, amount: incomeToEdit.amount });
+      setModalVisible(true);
+      setEditingId(id); // Track the ID being edited
+    }
+  };
+
+  const confirmDelete = (incomeId) => {
+    setIncomeToDelete(incomeId);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteIncome = async () => {
+    if (!incomeToDelete) return;
+    try {
+      await api.delete(`/income/${incomeToDelete}`);
+      setIncome((prevIncome) => prevIncome.filter((item) => item._id !== incomeToDelete));
+      setDeleteModalVisible(false);
+      setIncomeToDelete(null);
+      setToastMessage('Income deleted successfully!');
+      setToastVisible(true);
+    } catch (error) {
+      console.error('Failed to delete income:', error.response?.data || error.message);
+      showToast('Failed to delete income', 'danger');
     }
   };
 
@@ -101,10 +160,19 @@ const Income = () => {
                       <CTableDataCell>{new Date(item.createdAt).toLocaleDateString()}</CTableDataCell>
                       <CTableDataCell>{item.userId.name}</CTableDataCell>
                       <CTableDataCell>
-                        <CButton color="warning" size="sm" className="me-2">
+                        <CButton
+                          color="warning"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => handleEditIncome(item._id)}
+                        >
                           Edit
                         </CButton>
-                        <CButton color="danger" size="sm">
+                        <CButton
+                          color="danger"
+                          size="sm"
+                          onClick={() => confirmDelete(item._id)}
+                        >
                           Delete
                         </CButton>
                       </CTableDataCell>
@@ -137,10 +205,10 @@ const Income = () => {
 
       <CModal visible={modalVisible} onClose={() => setModalVisible(false)}>
         <CModalHeader>
-          <CModalTitle>Add Income</CModalTitle>
+          <CModalTitle>{editingId ? 'Edit' : 'Add'} Income</CModalTitle>
         </CModalHeader>
         <CModalBody>
-          <CForm onSubmit={handleAddIncome}>
+          <CForm onSubmit={handleAddOrUpdateIncome}>
             <CFormInput
               className="mb-3"
               type="text"
@@ -160,7 +228,7 @@ const Income = () => {
               required
             />
             <CButton type="submit" color="primary">
-              Add Income
+              {editingId ? 'Update' : 'Add'} Income
             </CButton>
           </CForm>
         </CModalBody>
@@ -170,6 +238,32 @@ const Income = () => {
           </CButton>
         </CModalFooter>
       </CModal>
+
+      <CModal visible={deleteModalVisible} onClose={() => setDeleteModalVisible(false)}>
+        <CModalHeader>
+          <CModalTitle>Confirm Delete</CModalTitle>
+        </CModalHeader>
+        <CModalBody>Are you sure you want to delete this income?</CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setDeleteModalVisible(false)}>
+            Cancel
+          </CButton>
+          <CButton color="danger" onClick={handleDeleteIncome}>
+            Delete
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      <CToaster placement="top-end">
+              {toastVisible && (
+                <CToast autohide={true} visible={toastVisible} onClose={() => setToastVisible(false)}>
+                  <CToastBody>
+                    {toastMessage}
+                    <CToastClose onClick={() => setToastVisible(false)} />
+                  </CToastBody>
+                </CToast>
+              )}
+            </CToaster>
     </CContainer>
   );
 };

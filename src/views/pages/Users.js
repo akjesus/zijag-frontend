@@ -46,7 +46,7 @@ const Users = () => {
         setUsers(response.data);
       } catch (error) {
         //set a notification for error
-        setToastMessage(error.message || 'Failed to fetch users' );
+        setToastMessage(error.response?.data?.message || 'Failed to fetch users' );
         setToastVisible(true);
         console.error( error.response?.data || error.message);
       }
@@ -69,8 +69,10 @@ const Users = () => {
       setToastMessage('User added successfully!');
       setToastVisible(true);
     } catch (error) {
-      console.error('Failed to add user:', error.response?.data || error.message);
-    }
+        console.error('Failed to add user:', error.response?.data.message);
+        setToastMessage(error.response?.data.message || 'Failed to add user');
+        setToastVisible(true);
+      }
   };
 
   const confirmDelete = (userId) => {
@@ -81,14 +83,16 @@ const Users = () => {
   const handleDelete = async () => {
     if (!userToDelete) return;
     try {
-      await api.delete(`/users/${userToDelete}`);
+      await api.delete(`/auth/users/${userToDelete}`);
       setUsers(users.filter((user) => user._id !== userToDelete));
       setDeleteModalVisible(false);
       setUserToDelete(null);
       setToastMessage('User deleted successfully!');
       setToastVisible(true);
     } catch (error) {
-      console.error('Failed to delete user:', error.response?.data || error.message);
+      console.error('Failed to delete user:', error.response?.data.message);
+      setToastMessage(error.response?.data.message || 'Failed to delete user');
+      setToastVisible(true);
     }
   };
 
@@ -110,7 +114,9 @@ const Users = () => {
       setToastMessage('User updated successfully!');
       setToastVisible(true);
     } catch (error) {
-      console.error('Failed to update user:', error.response?.data || error.message);
+      console.error('Failed to update user:', error.response?.data.message);
+      setToastMessage(error.response?.data.message || 'Failed to update user');
+      setToastVisible(true);
     }
   };
 

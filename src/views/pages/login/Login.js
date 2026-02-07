@@ -14,10 +14,10 @@ import {
   CInputGroup,
   CInputGroupText,
   CRow,
-  CToaster,
   CToast,
   CToastBody,
   CToastClose,
+  CToaster,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
@@ -25,22 +25,21 @@ import { cilLockLocked, cilUser } from '@coreui/icons'
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [toastVisible, setToastVisible] = useState(false)
-  const [toastMessage, setToastMessage] = useState('')
-  const [toastColor, setToastColor] = useState('') // Color for success or error
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastColor, setToastColor] = useState('') 
   const navigate = useNavigate()
 
   const handleLogin = async (email, password) => {
     try {
       const response = await axios.post(`/auth/login`, { email, password })
-      const { token } = response.data // 
+      const { token, role } = response.data; 
       localStorage.setItem('token', token) 
-  
+      localStorage.setItem('role', role) 
       navigate('/dashboard')
     } catch (error) {
-      console.error('Login failed:', error.response?.data || error.message)
-      setToastMessage('Login failed. Please check your credentials.')
-      setToastColor('danger')
+      console.error('Login failed:', error.response?.data?.message || error.message)
+      setToastMessage(error.response?.data?.message || 'Login failed');
       setToastVisible(true)
     }
   }
