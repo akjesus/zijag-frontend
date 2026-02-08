@@ -30,6 +30,7 @@ const Expenses = () => {
   const [newExpense, setNewExpense] = useState({ description: '', amount: '' });
   const [expenseToEdit, setExpenseToEdit] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Spinner state
   const itemsPerPage = 10; // Number of expenses per page
 
   useEffect(() => {
@@ -52,6 +53,7 @@ const Expenses = () => {
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Start spinner
     try {
       const response = await api.post('/expenses', newExpense);
       setExpenses((prevExpenses) => [...prevExpenses, response.data.expense]);
@@ -59,6 +61,8 @@ const Expenses = () => {
       setNewExpense({ description: '', amount: '' });
     } catch (error) {
       console.error('Failed to add expense:', error.response?.data || error.message);
+    } finally {
+      setIsSubmitting(false); // Stop spinner
     }
   };
 
@@ -192,8 +196,13 @@ const Expenses = () => {
               onChange={handleInputChange}
               required
             />
-            <CButton type="submit" color="primary">
-              Add Expense
+            <CButton type="submit" color="primary" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              ) : (
+                'Add'
+              )}{' '}
+              Expense
             </CButton>
           </CForm>
         </CModalBody>

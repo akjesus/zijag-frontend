@@ -37,6 +37,7 @@ const Income = () => {
   const [toastMessage, setToastMessage] = useState('')
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [incomeToDelete, setIncomeToDelete] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const itemsPerPage = 10; // Number of income entries per page
 
   useEffect(() => {
@@ -64,6 +65,7 @@ const Income = () => {
 
   const handleAddOrUpdateIncome = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Start spinner
     try {
       if (editingId) {
         // Update existing income
@@ -72,7 +74,7 @@ const Income = () => {
           prevIncome.map((item) => (item._id === editingId ? response.data.income : item))
         );
         setToastMessage('Income updated successfully!');
-      setToastVisible(true);
+        setToastVisible(true);
       } else {
         // Add new income
         const response = await api.post('/income', newIncome);
@@ -87,6 +89,8 @@ const Income = () => {
       console.error('Failed to save income:', error.response?.data || error.message);
       setToastMessage('Failed to save income');
       setToastVisible(true);
+    } finally {
+      setIsSubmitting(false); // Stop spinner
     }
   };
 
@@ -227,8 +231,8 @@ const Income = () => {
               onChange={handleInputChange}
               required
             />
-            <CButton type="submit" color="primary">
-              {editingId ? 'Update' : 'Add'} Income
+            <CButton type="submit" color="primary" disabled={isSubmitting}>
+              {isSubmitting ? <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> : editingId ? 'Update' : 'Add'} Income
             </CButton>
           </CForm>
         </CModalBody>

@@ -26,6 +26,7 @@ const Reports = () => {
   const [reports, setReports] = useState(null); // Change to handle a single report object
   const [modalVisible, setModalVisible] = useState(false);
   const [filters, setFilters] = useState({ startDate: '', endDate: '', reportType: '' });
+  const [isFiltering, setIsFiltering] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,13 +35,18 @@ const Reports = () => {
 
   const handleFilterReports = async (e) => {
     e.preventDefault();
+    setIsFiltering(true); // Start spinner
     try {
       const response = await api.get('/reports', { params: filters }); // Fetch filtered reports from the backend
-      setReports(response.data); // Set the single report object
+      setReports(response.data); 
       console.log(response.data);
+      //clear the modal inputs
+      // setFilters({ startDate: '', endDate: '', reportType: '' });
       setModalVisible(false);
     } catch (error) {
       console.error('Failed to filter reports:', error.response?.data || error.message);
+    } finally {
+      setIsFiltering(false); // Stop spinner
     }
   };
 
@@ -52,7 +58,7 @@ const Reports = () => {
             <CCardHeader>
               <div className="d-flex justify-content-between align-items-center">
                 <h4>Financial Reports</h4>
-                <CButton color="primary" onClick={() => setModalVisible(true)}>
+                <CButton color="primary" onClick={() => { setModalVisible(true); setReports(null); }}>
                   Filter Reports
                 </CButton>
               </div>
@@ -61,6 +67,7 @@ const Reports = () => {
               {filters.reportType === 'detailed' && reports && (
                 <>
                   <p><strong>Total Income:</strong> N{reports.totalIncome}</p>
+                  <p><strong>Total Sales:</strong> N{reports.totalSales}</p>
                   <p><strong>Total Expenses:</strong> N{reports.totalExpenses}</p>
                   <p><strong>Net Profit:</strong> N{reports.netProfit}</p>
                   <p><strong>Date:</strong> from {new Date(reports.startDate).toLocaleDateString()} to {new Date(reports.endDate).toLocaleDateString()}</p>
@@ -161,8 +168,8 @@ const Reports = () => {
               <option value="summary">Summary</option>
               <option value="detailed">Detailed</option>
             </CFormSelect>
-            <CButton type="submit" color="primary">
-              Apply Filters
+            <CButton type="submit" color="primary" disabled={isFiltering}>
+              {isFiltering ? <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> : 'Apply Filters'}
             </CButton>
           </CForm>
         </CModalBody>

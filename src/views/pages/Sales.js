@@ -43,6 +43,7 @@ const Sales = () => {
   const [inventory, setInventory] = useState([]); 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; 
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const handleItemChange = (index, e) => {
     const { name, value } = e.target;
@@ -71,6 +72,7 @@ const Sales = () => {
 
   const handleAddSale = async (e) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when the process starts
     try {
       const response = await api.post('/sales', { items });
 
@@ -81,11 +83,12 @@ const Sales = () => {
       setItems([{ product: '', quantity: '', price: '' }]);
       setToastMessage('Sales added successfully!');
       setToastVisible(true);
-
     } catch (error) {
       console.error( error.response?.data);
       setToastMessage(error.response?.data.message);
       setToastVisible(true);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -343,8 +346,12 @@ const Sales = () => {
               <CButton color="success" size="sm" onClick={handleAddItem}>
                 Add Item
               </CButton>
-              <CButton type="submit" color="primary">
-                Add Sales
+              <CButton type="submit" color="primary" disabled={loading}>
+                {loading ? (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                ) : (
+                  'Add Sales'
+                )}
               </CButton>
             </div>
           </CForm>

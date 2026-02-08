@@ -28,10 +28,12 @@ const Login = () => {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState('') 
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleLogin = async (email, password) => {
     try {
+      setLoading(true)
       const response = await axios.post(`/auth/login`, { email, password })
       const { token, role } = response.data; 
       localStorage.setItem('token', token) 
@@ -40,14 +42,15 @@ const Login = () => {
     } catch (error) {
       console.error('Login failed:', error.response?.data?.message || error.message)
       setToastMessage(error.response?.data?.message || 'Login failed');
-      setToastVisible(true)
+      setToastVisible(true);
+      setLoading(false)
     }
   }
 
   return (
-    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center justify-content-center">
       <CContainer>
-        <CRow className="justify-content-center">
+        <CRow className="justify-content-center text-center">
           <CCol md={8}>
             <CCardGroup>
               <CCard className="p-4" style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -79,16 +82,19 @@ const Login = () => {
                       />
                     </CInputGroup>
                     <CRow>
-                      <CCol xs={6}>
+                      <CCol>
                         <CButton
                           color="primary"
                           className="px-4"
                           onClick={() => handleLogin(email, password)}
+                          disabled={loading} // Disable button when loading
                         >
-                          Login
+                          {loading ? (
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                          ) : (
+                            'Login'
+                          )}
                         </CButton>
-                      </CCol>
-                      <CCol xs={6} className="text-right">
                       </CCol>
                     </CRow>
                   </CForm>

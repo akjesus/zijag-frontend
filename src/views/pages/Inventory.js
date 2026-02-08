@@ -38,6 +38,7 @@ const Inventory = () => {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false); // Add loading state
   const itemsPerPage = 10; // Number of inventory items per page
 
   useEffect(() => {
@@ -93,6 +94,7 @@ const Inventory = () => {
   };
 
   const handleCreateInventory = async () => {
+    setLoading(true); // Set loading to true when the process starts
     try {
       const response = await api.post('/inventory', newInventory);
       setInventories((prevInventories) => [...prevInventories, response.data.inventory]); // Update the inventory list immediately
@@ -104,6 +106,8 @@ const Inventory = () => {
       console.error('Failed to create inventory:', error.response?.data || error.message);
       setToastMessage('Failed to add inventory item.');
       setToastVisible(true);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -169,6 +173,7 @@ const Inventory = () => {
                     <CTableHeaderCell>Item Name</CTableHeaderCell>
                     <CTableHeaderCell>Quantity</CTableHeaderCell>
                     <CTableHeaderCell>Price</CTableHeaderCell>
+                    <CTableHeaderCell>Created By</CTableHeaderCell>
                     <CTableHeaderCell>Actions</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
@@ -179,6 +184,7 @@ const Inventory = () => {
                       <CTableDataCell>{item.name}</CTableDataCell>
                       <CTableDataCell>{item.quantity}</CTableDataCell>
                       <CTableDataCell>{item.price}</CTableDataCell>
+                      <CTableDataCell>{item.userId.name}</CTableDataCell>
                       <CTableDataCell>
                         <CButton
                           color="info"
@@ -311,8 +317,13 @@ const Inventory = () => {
                 handleCreateInventory();
               }
             }}
+            disabled={loading} // Disable button when loading
           >
-            {newInventory._id ? 'Update' : 'Create'}
+            {loading ? (
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            ) : (
+              newInventory._id ? 'Update' : 'Create'
+            )}
           </CButton>
         </CModalFooter>
       </CModal>
